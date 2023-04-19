@@ -1,0 +1,11 @@
+{
+    "Lua.diagnostics.globals": [
+        "term",
+        "peripheral",
+        "colors",
+        "sleep",
+        "read",
+        "textutils",
+        "shell"
+    ]
+}

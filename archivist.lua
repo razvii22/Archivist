@@ -1,4 +1,7 @@
+completion = require "cc.completion"
+
 term.clear()
+
 term.setCursorPos(1,1)
 --innitialise locals
 local version = "1.1.1"
@@ -40,8 +43,26 @@ print("My job is to help extract items out of the vault.")
 print('Please provide a FULL item name to search or "exit"')
 term.setTextColor(colors.red)
 term.write(">")
-local search = arg[1] or read()
-    
+local autocomplete = {}
+local seen = {}
+
+for k,v in pairs(index) do
+    --print(k,textutils.serialise(index[k]))
+    autocomplete[k] = v
+end
+
+for k,v in pairs(autocomplete) do
+    if seen[v] then
+        table.remove(autocomplete,v)
+    else
+        seen[v] = true
+    end
+end
+
+
+local search = arg[1] or read(nil,nil, function (text) return completion.choice(text, autocomplete) end)
+
+
 if search == "exit" then textutils.slowPrint("Exiting...") return 0 end
 term.setTextColor(colors.white)
 local item 
