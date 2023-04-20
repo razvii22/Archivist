@@ -1,10 +1,10 @@
-completion = require "cc.completion"
-
+local completion = require "cc.completion"
+local autocomplete = settings.get("archivist.autocomplete")
 term.clear()
 
 term.setCursorPos(1,1)
 --innitialise locals
-local version = "1.1.1"
+local version = "exp 1.2.0"
 local chest = {}
 local vault = {}
 
@@ -35,6 +35,8 @@ if #arg ~= 0 then
 else
     command = false
 end
+
+
 while true do
 print("Indexing vault...")
 local index = vault.list()
@@ -43,25 +45,9 @@ print("My job is to help extract items out of the vault.")
 print('Please provide a FULL item name to search or "exit"')
 term.setTextColor(colors.red)
 term.write(">")
-local autocomplete = {}
-local seen = {}
-
-for k,v in pairs(index) do
-    --print(k,textutils.serialise(index[k]))
-    autocomplete[k] = v
-end
-
-for k,v in pairs(autocomplete) do
-    if seen[v] then
-        table.remove(autocomplete,v)
-    else
-        seen[v] = true
-    end
-end
 
 
-local search = arg[1] or read(nil,nil, function (text) return completion.choice(text, autocomplete) end)
-
+local search = arg[1] or read(nil,nil, function(text) return completion.choice(text,autocomplete) end)
 
 if search == "exit" then textutils.slowPrint("Exiting...") return 0 end
 term.setTextColor(colors.white)
@@ -73,11 +59,27 @@ local item
          break
      end
  end
+ 
+ local function value(value,table)
+     for k,v in ipairs(table) do
+         if v == value then
+             return false
+         end
+     end
+     return true
+ end
+ 
+ 
+ 
  if item then 
      print("Found the "..search:sub(11,search:len()).." on slot "..item)
      print("Attempting to eject "..index[item].count.." "..search:sub(11,search:len()).." into the chest...")
      vault.pushItems(peripheral.getName(chest),item)
      print("Ejected!")
+     local add = value(search,autocomplete)
+     if add then autocomplete[#autocomplete+1] = search end
+     settings.set("archivist.autocomplete",autocomplete)
+     settings.save()
  else
      print("No item of that name found...")
  end
